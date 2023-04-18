@@ -13,7 +13,9 @@ class Producto:
     imagen = Column(String)
     nombre = Column(String)
     distribuidor = Column(String)
+    ASIN=Column(String)
     precio = Column(Float)
+    EAN= Column(String)
 
     def as_dict(self):
         return {c.key: getattr(self, c.key) for c in class_mapper(self.__class__).columns}
