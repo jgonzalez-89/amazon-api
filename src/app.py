@@ -57,19 +57,29 @@ def get_productos_por_fecha(fecha):
         return jsonify({"error": "Error al obtener productos por fecha"}), 500
 
 
-@app.route('/upload_json', methods=['POST'])
+@app.route('/file', methods=['POST'])
 def upload_json():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No se encontró el archivo'}), 400
+    if 'file' in request.files:
+        # Si se ha enviado un archivo
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'No se seleccionó ningún archivo'}), 400
 
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'No se seleccionó ningún archivo'}), 400
+        # Leer el archivo JSON y convertirlo en un objeto Python
+        file_content = json.load(file)
 
-    # Leer el archivo JSON y convertirlo en un objeto Python
-    file_content = json.load(file)
+    elif request.is_json:
+        # Si se ha enviado un objeto JSON en crudo
+        file_content = request.get_json()
 
-    # Convertir el objeto Python en un DataFrame de Pandas
+    else:
+        return jsonify({'error': 'No se encontró el archivo o el JSON en crudo'}), 400
+
+    # Convertir el objeto Python en una lista si no es una lista
+    if not isinstance(file_content, list):
+        file_content = [file_content]
+
+    # Convertir la lista de objetos Python en un DataFrame de Pandas
     data = pd.DataFrame.from_dict(file_content)
     records = data.to_dict(orient='records')
 
@@ -82,7 +92,8 @@ def upload_json():
                 distribuidor=record['distribuidor'],
                 ASIN=record['ASIN'],
                 precio=record['precio'],
-                imagen=record['imagen']
+                imagen=record['imagen'],
+                EAN=record['EAN']
             )
             db.session.add(producto)
         db.session.commit()
@@ -91,6 +102,7 @@ def upload_json():
         print("Error al procesar y guardar los datos del JSON:", e)
         db.session.rollback()
         return jsonify({'error': 'Error al procesar y guardar los datos del JSON'}), 500
+
 
 
 @app.route('/fecha/<string:fecha>', methods=['DELETE'])
@@ -117,33 +129,3 @@ def delete_productos_por_fecha(fecha):
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
-
-# @app.route('/upload_csv', methods=['POST'])
-# def upload_csv():
-#     if 'file' not in request.files:
-#         return jsonify({'error': 'No se encontró el archivo'}), 400
-
-#     file = request.files['file']
-#     if file.filename == '':
-#         return jsonify({'error': 'No se seleccionó ningún archivo'}), 400
-
-#     data = pd.read_csv(file)
-#     records = data.to_dict(orient='records')
-
-#     try:
-#         for record in records:
-#             fecha_obj = datetime.strptime(record['fecha'], "%Y-%m-%d").date()
-#             producto = Product(
-#                 fecha=fecha_obj,
-#                 nombre=record['nombre'],
-#                 distribuidor=record['distribuidor'],
-#                 precio=record['precio'],
-#                 imagen=record['imagen']
-#             )
-#             db.session.add(producto)
-#         db.session.commit()
-#         return jsonify({'message': 'CSV procesado y añadido'})
-#     except Exception as e:
-#         print("Error al procesar y guardar los datos del CSV:", e)
-#         db.session.rollback()
-#         return jsonify({'error': 'Error al procesar y guardar los datos del CSV'}), 500
