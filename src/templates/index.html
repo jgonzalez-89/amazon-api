@@ -1,22 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API de Productos</title>
-</head>
-<body>
-    <h1>API de Productos</h1>
-    <p>Esta es la API para acceder a información de productos.</p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Amazon API</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        background-color: #f7f7f7;
+      }
+
+      h1 {
+        font-size: 2.5em;
+        margin-top: 2em;
+        margin-bottom: 1em;
+      }
+
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+
+      li {
+        margin-bottom: 1em;
+      }
+
+      a {
+        text-decoration: none;
+        color: #1a73e8;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Amazon API</h1>
     <ul>
-        <li><a href="/productos">Ver todos los productos</a></li>
-        <li><a href="/fecha/{{ today.strftime('%Y-%m-%d') }}">Ver productos por fecha (hoy: {{ today.strftime('%Y-%m-%d') }})</a></li>
+      <li><a href="/productos" target="_blank">/productos</a></li>
+      <li>
+        <a href="/fecha/2023-04-29" target="_blank">/fecha/{{ fecha }}</a>
+      </li>
     </ul>
-    <h2>Últimas 5 fechas con productos</h2>
-    <ul>
-        {% for fecha in last_five_dates %}
-        <li><a href="/fecha/{{ fecha.strftime('%Y-%m-%d') }}">Productos del {{ fecha.strftime('%Y-%m-%d') }}</a></li>
-        {% endfor %}
-    </ul>
-</body>
+  </body>
 </html>

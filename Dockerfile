@@ -16,7 +16,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copia la carpeta src con el código de la aplicación
 COPY src/ src/
 
-ENV DATABASE_URL=postgresql://mypinga:2xauq08ifk8XXs0Hpl8ijHKsGSNpb2W1@dpg-cgjacvgrjeniuke5lqvg-a.frankfurt-postgres.render.com/products_box5
+ENV DATABASE_URL=postgresql://userdatabase:vc8ZoAp9DL5LtHOqrjtI9ldxbgRVFtTi@dpg-ch2k77t269v61fdoakc0-a.frankfurt-postgres.render.com/amazondatabase
 
 
 # Expone el puerto en el que se ejecutará la aplicación
