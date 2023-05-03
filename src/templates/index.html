@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -30,15 +30,36 @@
         text-decoration: none;
         color: #1a73e8;
       }
+
+      img.logo {
+        max-width: 600px;
+        margin-top: 2em;
+      }
     </style>
   </head>
+
   <body>
+    <img src="../static/logo.png" alt="Logo Flask" class="logo" />
     <h1>Amazon API</h1>
     <ul>
-      <li><a href="/productos" target="_blank">/productos</a></li>
       <li>
-        <a href="/fecha/2023-04-29" target="_blank">/fecha/{{ fecha }}</a>
+        <a href="/productos" target="_blank">/productos</a>
+      </li>
+      <li>
+        <a href="/producto/B00ZPQ129C" target="_blank">/producto por ASIN</a>
+      </li>
+      <li>
+        <a href="/fecha" target="_blank" id="fecha">/fecha/{{ fecha }}</a>
       </li>
     </ul>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const fechaElement = document.getElementById("fecha");
+        const today = new Date();
+        const dateString = today.toISOString().split("T")[0];
+        fechaElement.href = "/fecha/" + dateString;
+        fechaElement.textContent = "/fecha/" + dateString;
+      });
+    </script>
   </body>
 </html>

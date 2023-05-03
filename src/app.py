@@ -1,97 +1,25 @@
-from flask import request
 import os
 import ujson
 from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request
-from datetime import datetime, date
+from datetime import datetime
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from sqlalchemy import desc
-import pandas as pd
-import math
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import relationship, class_mapper
-from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey, Numeric
 from sqlalchemy.orm import selectinload
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token
-from collections import defaultdict
-
+from src.api.models import db, Producto, Historico, User
 
 load_dotenv()
-
 
 app = Flask(__name__)
 CORS(app)
 app.config.from_pyfile("config.py")
 app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
-db = SQLAlchemy(app)
+db.init_app(app)
 migrate = Migrate(app, db)
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
-
-
-class User(db.Model):
-    __tablename__ = 'users'
-
-    id = Column(Integer, primary_key=True)
-    email = Column(String(255), unique=True, nullable=False)
-    password = Column(String(255), nullable=False)
-
-    def as_dict(self):
-        return {
-            'id': self.id,
-            'email': self.email,
-        }
-
-
-class Producto(db.Model):
-    __tablename__ = 'productos'
-
-    id = Column(Integer, primary_key=True)
-    imagen = Column(String(255))
-    nombre = Column(String(255))
-    ASIN = Column(String(255), index=True)
-    EAN = Column(Numeric(asdecimal=False), nullable=True, index=True)
-
-    historicos = relationship("Historico", back_populates="producto")
-
-    def as_dict(self):
-        historicos_dict = defaultdict(list)
-        for historico in self.historicos:
-            historicos_dict[historico.id_vendedor].append({
-                'fecha': historico.fecha.isoformat(),
-                'precio': float(historico.precio),
-            })
-
-        return {
-            'imagen': self.imagen,
-            'nombre': self.nombre,
-            'ASIN': self.ASIN,
-            'EAN': None if self.EAN is None or (isinstance(self.EAN, float) and math.isnan(self.EAN)) else float(self.EAN),
-            'historicos': historicos_dict
-        }
-
-
-class Historico(db.Model):
-    __tablename__ = 'historicos'
-
-    id = Column(Integer, primary_key=True)
-    fecha = Column(Date, index=True)
-    id_vendedor = Column(String(255), nullable=False)
-    precio = Column(Float)
-
-    producto_id = Column(Integer, ForeignKey('productos.id'))
-    producto = relationship("Producto", back_populates="historicos")
-
-    def as_dict(self):
-        return {
-            'id': self.id,
-            'fecha': self.fecha.isoformat(),
-            'id_vendedor': self.id_vendedor,
-            'precio': float(self.precio),
-        }
 
 
 @app.route('/')
@@ -150,6 +78,20 @@ def get_productos_por_fecha(fecha):
         print("Error al obtener productos por fecha:", e)
         return jsonify({"error": "Error al obtener productos por fecha"}), 500
 
+
+@app.route('/producto/<string:asin>', methods=['GET'])
+def get_producto_por_asin(asin):
+    try:
+        producto = Producto.query.filter_by(ASIN=asin).first()
+        if not producto:
+            return jsonify({"error": "Producto no encontrado"}), 404
+
+        return jsonify(producto.as_dict())
+    except Exception as e:
+        print("Error al obtener producto por ASIN:", e)
+        return jsonify({"error": "Error al obtener producto por ASIN"}), 500
+
+
 @app.route('/file', methods=['POST'])
 def upload_json():
     if 'file' in request.files:
@@ -203,7 +145,6 @@ def upload_json():
         print("Error al procesar y guardar los datos del JSON:", e)
         db.session.rollback()
         return jsonify({'error': 'Error al procesar y guardar los datos del JSON'}), 500
-
 
 
 @app.route('/register', methods=['POST'])

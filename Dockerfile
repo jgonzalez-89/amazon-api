@@ -18,7 +18,6 @@ COPY src/ src/
 
 ENV DATABASE_URL=postgresql://userdatabase:vc8ZoAp9DL5LtHOqrjtI9ldxbgRVFtTi@dpg-ch2k77t269v61fdoakc0-a.frankfurt-postgres.render.com/amazondatabase
 
-
 # Expone el puerto en el que se ejecutará la aplicación
 EXPOSE 5000
 
