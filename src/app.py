@@ -8,7 +8,7 @@ from flask_migrate import Migrate
 from sqlalchemy.orm import selectinload
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token
-from src.api.models import db, Producto, Historico, User
+from api.models import db, Producto, Historico, User
 
 load_dotenv()
 
